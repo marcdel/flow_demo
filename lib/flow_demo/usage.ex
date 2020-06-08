@@ -1,6 +1,4 @@
 defmodule FlowDemo.Usage do
-  alias __MODULE__
-
   defstruct [:type, :value]
 
   def write_usage(billing_period) do
@@ -16,16 +14,16 @@ defmodule FlowDemo.Usage do
   end
 
   defp get_usage(type, billing_period) do
-    duration = Work.hard()
+    Work.hard()
 
     FakeTelemetry.execute(
-      "Getting storage usage for organization: #{billing_period.organization.id}, type: #{
+      "Getting #{type} usage for organization: #{billing_period.organization.id}, type: #{
         billing_period.type
       }, provider: #{billing_period.organization.provider}, region: #{
         billing_period.organization.region
-      }, duration: #{duration}"
+      }"
     )
 
-    %Usage{type: type, value: Enum.random(1..100)}
+    %__MODULE__{type: type, value: Enum.random(1..100)}
   end
 end

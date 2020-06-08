@@ -1,17 +1,14 @@
 defmodule Work do
   def hard do
-    do_work(3..3)
-    #    do_work(9..10)
+    do_work(1..1)
   end
 
   def medium do
-    do_work(2..2)
-    #        do_work(3..4)
+    do_work(1..1)
   end
 
   def easy do
     do_work(1..1)
-    #        do_work(1..2)
   end
 
   defp do_work(range) do
@@ -21,6 +18,15 @@ defmodule Work do
         |> Enum.random()
         |> :timer.seconds()
         |> Process.sleep()
+
+        if Enum.random(1..20) == 2 do
+          IO.inspect("Bad luck!!")
+          10
+          |> :timer.seconds()
+          |> Process.sleep()
+        end
+
+        :ok
       end)
 
     duration

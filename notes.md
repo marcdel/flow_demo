@@ -1,0 +1,238 @@
+## With no partition, it does one at a time
+```elixir
+Organization.billing_periods()
+|> Organization.by_region()
+|> Flow.from_enumerables()
+|> Flow.map(&Usage.read_usage/1)
+|> Flow.map(&Usage.write_usage/1)
+|> Flow.map(&Usage.storage_usage/1)
+|> Flow.flat_map(&Bill.generate(&1))
+|> Enum.to_list()
+```
+### Results
+```
+"Getting storage usage for organization: 1, type: pay, provider: AWS, region: us-west-1"
+"Getting storage usage for organization: 1, type: pay, provider: AWS, region: us-west-1"
+"Getting storage usage for organization: 1, type: pay, provider: AWS, region: us-west-1"
+"Generating bills for organization: 1, usage type: pay, provider: AWS, region: us-west-1"
+"Generating bills for organization: 1, usage type: pay, provider: AWS, region: us-west-1"
+"Generating bills for organization: 1, usage type: pay, provider: AWS, region: us-west-1"
+"Getting storage usage for organization: 1, type: free, provider: AWS, region: us-west-1"
+"Getting storage usage for organization: 1, type: free, provider: AWS, region: us-west-1"
+"Getting storage usage for organization: 1, type: free, provider: AWS, region: us-west-1"
+"Generating bills for organization: 1, usage type: free, provider: AWS, region: us-west-1"
+"Generating bills for organization: 1, usage type: free, provider: AWS, region: us-west-1"
+"Generating bills for organization: 1, usage type: free, provider: AWS, region: us-west-1"
+"Getting storage usage for organization: 4, type: pay, provider: GCP, region: us-west-1"
+"Getting storage usage for organization: 4, type: pay, provider: GCP, region: us-west-1"
+"Getting storage usage for organization: 4, type: pay, provider: GCP, region: us-west-1"
+"Generating bills for organization: 4, usage type: pay, provider: GCP, region: us-west-1"
+"Generating bills for organization: 4, usage type: pay, provider: GCP, region: us-west-1"
+"Generating bills for organization: 4, usage type: pay, provider: GCP, region: us-west-1"
+"Getting storage usage for organization: 4, type: free, provider: GCP, region: us-west-1"
+"Getting storage usage for organization: 4, type: free, provider: GCP, region: us-west-1"
+"Getting storage usage for organization: 4, type: free, provider: GCP, region: us-west-1"
+"Generating bills for organization: 4, usage type: free, provider: GCP, region: us-west-1"
+"Generating bills for organization: 4, usage type: free, provider: GCP, region: us-west-1"
+"Generating bills for organization: 4, usage type: free, provider: GCP, region: us-west-1"
+```
+
+## Two orgs at a time across regions
+```elixir
+Organization.billing_periods()
+|> Organization.by_region()
+|> Flow.from_enumerables()
+|> Flow.partition(key: {:key, :region})
+|> Flow.map(&Usage.read_usage/1)
+|> Flow.map(&Usage.write_usage/1)
+|> Flow.map(&Usage.storage_usage/1)
+|> Flow.flat_map(&Bill.generate(&1))
+|> Enum.to_list()
+```
+### Results
+```
+"Getting storage usage for organization: 4, type: pay, provider: AWS, region: us-east-1"
+"Getting storage usage for organization: 3, type: pay, provider: AWS, region: us-west-2"
+"Getting storage usage for organization: 4, type: pay, provider: AWS, region: us-east-1"
+"Getting storage usage for organization: 3, type: pay, provider: AWS, region: us-west-2"
+"Getting storage usage for organization: 4, type: pay, provider: AWS, region: us-east-1"
+"Getting storage usage for organization: 3, type: pay, provider: AWS, region: us-west-2"
+"Generating bills for organization: 4, usage type: pay, provider: AWS, region: us-east-1"
+"Generating bills for organization: 3, usage type: pay, provider: AWS, region: us-west-2"
+"Generating bills for organization: 4, usage type: pay, provider: AWS, region: us-east-1"
+"Generating bills for organization: 3, usage type: pay, provider: AWS, region: us-west-2"
+"Generating bills for organization: 4, usage type: pay, provider: AWS, region: us-east-1"
+"Generating bills for organization: 3, usage type: pay, provider: AWS, region: us-west-2"
+"Getting storage usage for organization: 4, type: free, provider: AWS, region: us-east-1"
+"Getting storage usage for organization: 3, type: free, provider: AWS, region: us-west-2"
+"Getting storage usage for organization: 4, type: free, provider: AWS, region: us-east-1"
+"Getting storage usage for organization: 3, type: free, provider: AWS, region: us-west-2"
+"Getting storage usage for organization: 4, type: free, provider: AWS, region: us-east-1"
+"Getting storage usage for organization: 3, type: free, provider: AWS, region: us-west-2"
+"Generating bills for organization: 4, usage type: free, provider: AWS, region: us-east-1"
+"Generating bills for organization: 3, usage type: free, provider: AWS, region: us-west-2"
+"Generating bills for organization: 4, usage type: free, provider: AWS, region: us-east-1"
+"Generating bills for organization: 3, usage type: free, provider: AWS, region: us-west-2"
+"Generating bills for organization: 4, usage type: free, provider: AWS, region: us-east-1"
+"Generating bills for organization: 3, usage type: free, provider: AWS, region: us-west-2"
+"Getting storage usage for organization: 1, type: pay, provider: AWS, region: us-west-1"
+"Getting storage usage for organization: 6, type: pay, provider: GCP, region: us-west-2"
+"Getting storage usage for organization: 1, type: pay, provider: AWS, region: us-west-1"
+"Getting storage usage for organization: 6, type: pay, provider: GCP, region: us-west-2"
+"Getting storage usage for organization: 1, type: pay, provider: AWS, region: us-west-1"
+"Getting storage usage for organization: 6, type: pay, provider: GCP, region: us-west-2"
+"Generating bills for organization: 1, usage type: pay, provider: AWS, region: us-west-1"
+"Generating bills for organization: 6, usage type: pay, provider: GCP, region: us-west-2"
+"Generating bills for organization: 1, usage type: pay, provider: AWS, region: us-west-1"
+"Generating bills for organization: 6, usage type: pay, provider: GCP, region: us-west-2"
+"Generating bills for organization: 1, usage type: pay, provider: AWS, region: us-west-1"
+"Generating bills for organization: 6, usage type: pay, provider: GCP, region: us-west-2"
+"Getting storage usage for organization: 1, type: free, provider: AWS, region: us-west-1"
+"Getting storage usage for organization: 6, type: free, provider: GCP, region: us-west-2"
+"Getting storage usage for organization: 1, type: free, provider: AWS, region: us-west-1"
+"Getting storage usage for organization: 6, type: free, provider: GCP, region: us-west-2"
+"Getting storage usage for organization: 1, type: free, provider: AWS, region: us-west-1"
+"Getting storage usage for organization: 6, type: free, provider: GCP, region: us-west-2"
+"Generating bills for organization: 1, usage type: free, provider: AWS, region: us-west-1"
+"Generating bills for organization: 6, usage type: free, provider: GCP, region: us-west-2"
+"Generating bills for organization: 1, usage type: free, provider: AWS, region: us-west-1"
+"Generating bills for organization: 6, usage type: free, provider: GCP, region: us-west-2"
+"Generating bills for organization: 1, usage type: free, provider: AWS, region: us-west-1"
+"Generating bills for organization: 6, usage type: free, provider: GCP, region: us-west-2"
+"Getting storage usage for organization: 2, type: pay, provider: AWS, region: us-west-1"
+"Getting storage usage for organization: 2, type: pay, provider: AWS, region: us-west-1"
+"Getting storage usage for organization: 2, type: pay, provider: AWS, region: us-west-1"
+"Generating bills for organization: 2, usage type: pay, provider: AWS, region: us-west-1"
+"Generating bills for organization: 2, usage type: pay, provider: AWS, region: us-west-1"
+"Generating bills for organization: 2, usage type: pay, provider: AWS, region: us-west-1"
+"Getting storage usage for organization: 2, type: free, provider: AWS, region: us-west-1"
+"Getting storage usage for organization: 2, type: free, provider: AWS, region: us-west-1"
+"Getting storage usage for organization: 2, type: free, provider: AWS, region: us-west-1"
+"Generating bills for organization: 2, usage type: free, provider: AWS, region: us-west-1"
+"Generating bills for organization: 2, usage type: free, provider: AWS, region: us-west-1"
+"Generating bills for organization: 2, usage type: free, provider: AWS, region: us-west-1"
+"Getting storage usage for organization: 5, type: pay, provider: GCP, region: us-west-1"
+"Getting storage usage for organization: 5, type: pay, provider: GCP, region: us-west-1"
+"Getting storage usage for organization: 5, type: pay, provider: GCP, region: us-west-1"
+"Generating bills for organization: 5, usage type: pay, provider: GCP, region: us-west-1"
+"Generating bills for organization: 5, usage type: pay, provider: GCP, region: us-west-1"
+"Generating bills for organization: 5, usage type: pay, provider: GCP, region: us-west-1"
+"Getting storage usage for organization: 5, type: free, provider: GCP, region: us-west-1"
+"Getting storage usage for organization: 5, type: free, provider: GCP, region: us-west-1"
+"Getting storage usage for organization: 5, type: free, provider: GCP, region: us-west-1"
+"Generating bills for organization: 5, usage type: free, provider: GCP, region: us-west-1"
+"Generating bills for organization: 5, usage type: free, provider: GCP, region: us-west-1"
+"Generating bills for organization: 5, usage type: free, provider: GCP, region: us-west-1"
+"Getting storage usage for organization: 7, type: pay, provider: Azure, region: us-west-1"
+"Getting storage usage for organization: 7, type: pay, provider: Azure, region: us-west-1"
+"Getting storage usage for organization: 7, type: pay, provider: Azure, region: us-west-1"
+"Generating bills for organization: 7, usage type: pay, provider: Azure, region: us-west-1"
+"Generating bills for organization: 7, usage type: pay, provider: Azure, region: us-west-1"
+"Generating bills for organization: 7, usage type: pay, provider: Azure, region: us-west-1"
+"Getting storage usage for organization: 7, type: free, provider: Azure, region: us-west-1"
+"Getting storage usage for organization: 7, type: free, provider: Azure, region: us-west-1"
+"Getting storage usage for organization: 7, type: free, provider: Azure, region: us-west-1"
+"Generating bills for organization: 7, usage type: free, provider: Azure, region: us-west-1"
+"Generating bills for organization: 7, usage type: free, provider: Azure, region: us-west-1"
+"Generating bills for organization: 7, usage type: free, provider: Azure, region: us-west-1"
+```
+
+## Multiple Orgs at a time across regions
+```elixir
+Organization.billing_periods()
+|> Organization.by_region()
+|> Flow.from_enumerables()
+|> Flow.partition(stages: 6)
+|> Flow.map(&Usage.read_usage/1)
+|> Flow.map(&Usage.write_usage/1)
+|> Flow.map(&Usage.storage_usage/1)
+|> Flow.flat_map(&Bill.generate(&1))
+|> Enum.to_list()
+```
+### Results
+```
+"Getting reads usage for organization: 6, type: pay, provider: GCP, region: gcp-west-2"
+"Getting reads usage for organization: 7, type: pay, provider: Azure, region: azure-west-1"
+"Getting reads usage for organization: 4, type: pay, provider: AWS, region: aws-east-1"
+"Getting reads usage for organization: 1, type: pay, provider: AWS, region: aws-west-1"
+"Getting reads usage for organization: 4, type: free, provider: AWS, region: aws-east-1"
+"Getting reads usage for organization: 2, type: pay, provider: AWS, region: aws-west-1"
+"Getting writes usage for organization: 6, type: pay, provider: GCP, region: gcp-west-2"
+"Getting writes usage for organization: 7, type: pay, provider: Azure, region: azure-west-1"
+"Getting writes usage for organization: 4, type: pay, provider: AWS, region: aws-east-1"
+"Getting writes usage for organization: 1, type: pay, provider: AWS, region: aws-west-1"
+"Getting writes usage for organization: 4, type: free, provider: AWS, region: aws-east-1"
+"Getting writes usage for organization: 2, type: pay, provider: AWS, region: aws-west-1"
+"Getting storage usage for organization: 6, type: pay, provider: GCP, region: gcp-west-2"
+"Getting storage usage for organization: 7, type: pay, provider: Azure, region: azure-west-1"
+"Getting storage usage for organization: 4, type: pay, provider: AWS, region: aws-east-1"
+"Getting storage usage for organization: 1, type: pay, provider: AWS, region: aws-west-1"
+"Getting storage usage for organization: 4, type: free, provider: AWS, region: aws-east-1"
+"Getting storage usage for organization: 2, type: pay, provider: AWS, region: aws-west-1"
+"Generating bills for organization: 7, type: pay, usage type: reads, provider: Azure, region: azure-west-1"
+"Generating bills for organization: 4, type: pay, usage type: reads, provider: AWS, region: aws-east-1"
+"Generating bills for organization: 1, type: pay, usage type: reads, provider: AWS, region: aws-west-1"
+"Generating bills for organization: 4, type: free, usage type: reads, provider: AWS, region: aws-east-1"
+"Generating bills for organization: 2, type: pay, usage type: reads, provider: AWS, region: aws-west-1"
+"Generating bills for organization: 6, type: pay, usage type: reads, provider: GCP, region: gcp-west-2"
+"Generating bills for organization: 7, type: pay, usage type: writes, provider: Azure, region: azure-west-1"
+"Generating bills for organization: 4, type: pay, usage type: writes, provider: AWS, region: aws-east-1"
+"Generating bills for organization: 1, type: pay, usage type: writes, provider: AWS, region: aws-west-1"
+"Generating bills for organization: 4, type: free, usage type: writes, provider: AWS, region: aws-east-1"
+"Generating bills for organization: 2, type: pay, usage type: writes, provider: AWS, region: aws-west-1"
+"Generating bills for organization: 6, type: pay, usage type: writes, provider: GCP, region: gcp-west-2"
+"Generating bills for organization: 7, type: pay, usage type: storage, provider: Azure, region: azure-west-1"
+"Generating bills for organization: 4, type: pay, usage type: storage, provider: AWS, region: aws-east-1"
+"Generating bills for organization: 1, type: pay, usage type: storage, provider: AWS, region: aws-west-1"
+"Generating bills for organization: 4, type: free, usage type: storage, provider: AWS, region: aws-east-1"
+"Generating bills for organization: 6, type: pay, usage type: storage, provider: GCP, region: gcp-west-2"
+"Generating bills for organization: 2, type: pay, usage type: storage, provider: AWS, region: aws-west-1"
+"Getting reads usage for organization: 3, type: free, provider: AWS, region: aws-west-2"
+"Getting reads usage for organization: 1, type: free, provider: AWS, region: aws-west-1"
+"Getting reads usage for organization: 7, type: free, provider: Azure, region: azure-west-1"
+"Getting reads usage for organization: 2, type: free, provider: AWS, region: aws-west-1"
+"Getting writes usage for organization: 1, type: free, provider: AWS, region: aws-west-1"
+"Getting writes usage for organization: 3, type: free, provider: AWS, region: aws-west-2"
+"Getting writes usage for organization: 2, type: free, provider: AWS, region: aws-west-1"
+"Getting writes usage for organization: 7, type: free, provider: Azure, region: azure-west-1"
+"Getting storage usage for organization: 1, type: free, provider: AWS, region: aws-west-1"
+"Getting storage usage for organization: 2, type: free, provider: AWS, region: aws-west-1"
+"Getting storage usage for organization: 3, type: free, provider: AWS, region: aws-west-2"
+"Getting storage usage for organization: 7, type: free, provider: Azure, region: azure-west-1"
+"Generating bills for organization: 3, type: free, usage type: reads, provider: AWS, region: aws-west-2"
+"Generating bills for organization: 1, type: free, usage type: reads, provider: AWS, region: aws-west-1"
+"Generating bills for organization: 3, type: free, usage type: writes, provider: AWS, region: aws-west-2"
+"Generating bills for organization: 2, type: free, usage type: reads, provider: AWS, region: aws-west-1"
+"Generating bills for organization: 3, type: free, usage type: storage, provider: AWS, region: aws-west-2"
+"Generating bills for organization: 7, type: free, usage type: reads, provider: Azure, region: azure-west-1"
+"Generating bills for organization: 1, type: free, usage type: writes, provider: AWS, region: aws-west-1"
+"Generating bills for organization: 7, type: free, usage type: writes, provider: Azure, region: azure-west-1"
+"Generating bills for organization: 2, type: free, usage type: writes, provider: AWS, region: aws-west-1"
+"Generating bills for organization: 2, type: free, usage type: storage, provider: AWS, region: aws-west-1"
+"Generating bills for organization: 1, type: free, usage type: storage, provider: AWS, region: aws-west-1"
+"Generating bills for organization: 7, type: free, usage type: storage, provider: Azure, region: azure-west-1"
+"Getting reads usage for organization: 3, type: pay, provider: AWS, region: aws-west-2"
+"Getting writes usage for organization: 3, type: pay, provider: AWS, region: aws-west-2"
+"Getting reads usage for organization: 5, type: pay, provider: GCP, region: gcp-west-1"
+"Getting storage usage for organization: 3, type: pay, provider: AWS, region: aws-west-2"
+"Getting writes usage for organization: 5, type: pay, provider: GCP, region: gcp-west-1"
+"Generating bills for organization: 3, type: pay, usage type: reads, provider: AWS, region: aws-west-2"
+"Getting storage usage for organization: 5, type: pay, provider: GCP, region: gcp-west-1"
+"Generating bills for organization: 3, type: pay, usage type: writes, provider: AWS, region: aws-west-2"
+"Generating bills for organization: 5, type: pay, usage type: reads, provider: GCP, region: gcp-west-1"
+"Generating bills for organization: 3, type: pay, usage type: storage, provider: AWS, region: aws-west-2"
+"Generating bills for organization: 5, type: pay, usage type: writes, provider: GCP, region: gcp-west-1"
+"Generating bills for organization: 5, type: pay, usage type: storage, provider: GCP, region: gcp-west-1"
+"Getting reads usage for organization: 6, type: free, provider: GCP, region: gcp-west-2"
+"Getting writes usage for organization: 6, type: free, provider: GCP, region: gcp-west-2"
+"Getting storage usage for organization: 6, type: free, provider: GCP, region: gcp-west-2"
+"Generating bills for organization: 6, type: free, usage type: reads, provider: GCP, region: gcp-west-2"
+"Generating bills for organization: 6, type: free, usage type: writes, provider: GCP, region: gcp-west-2"
+"Generating bills for organization: 6, type: free, usage type: storage, provider: GCP, region: gcp-west-2"
+"Getting reads usage for organization: 5, type: free, provider: GCP, region: gcp-west-1"
+"Getting writes usage for organization: 5, type: free, provider: GCP, region: gcp-west-1"
+"Getting storage usage for organization: 5, type: free, provider: GCP, region: gcp-west-1"
+"Generating bills for organization: 5, type: free, usage type: reads, provider: GCP, region: gcp-west-1"
+"Generating bills for organization: 5, type: free, usage type: writes, provider: GCP, region: gcp-west-1"
+"Generating bills for organization: 5, type: free, usage type: storage, provider: GCP, region: gcp-west-1"
+```

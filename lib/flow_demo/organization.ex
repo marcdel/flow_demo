@@ -9,12 +9,13 @@ defmodule FlowDemo.Organization do
     Work.medium()
 
     [
-      %Organization{id: 1, provider: "AWS", region: "us-west-1"},
-      %Organization{id: 2, provider: "AWS", region: "us-west-2"},
-      %Organization{id: 3, provider: "AWS", region: "us-east-1"},
-      %Organization{id: 4, provider: "GCP", region: "us-west-1"},
-      %Organization{id: 5, provider: "GCP", region: "us-west-2"},
-      %Organization{id: 7, provider: "Azure", region: "us-west-1"}
+      %Organization{id: 1, provider: "AWS", region: "aws-west-1"},
+      %Organization{id: 2, provider: "AWS", region: "aws-west-1"},
+      %Organization{id: 3, provider: "AWS", region: "aws-west-2"},
+      %Organization{id: 4, provider: "AWS", region: "aws-east-1"},
+      %Organization{id: 5, provider: "GCP", region: "gcp-west-1"},
+      %Organization{id: 6, provider: "GCP", region: "gcp-west-2"},
+      %Organization{id: 7, provider: "Azure", region: "azure-west-1"}
     ]
   end
 
@@ -49,12 +50,16 @@ defmodule FlowDemo.Organization do
     [
       %BillingPeriod{
         organization: organization,
+        provider: organization.provider,
+        region: organization.region,
         start: DateTime.add(DateTime.utc_now(), -60, :second),
         stop: DateTime.utc_now(),
         type: :pay
       },
       %BillingPeriod{
         organization: organization,
+        provider: organization.provider,
+        region: organization.region,
         start: DateTime.add(DateTime.utc_now(), -120, :second),
         stop: DateTime.add(DateTime.utc_now(), -60, :second),
         type: :free
