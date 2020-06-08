@@ -15,9 +15,9 @@ defmodule Work do
   end
 
   defp do_work(range) do
-    range
-    |> Enum.random()
-    |> :timer.seconds()
-    |> Process.sleep()
+#    range
+#    |> Enum.random()
+#    |> :timer.seconds()
+#    |> Process.sleep()
   end
 end
