@@ -20,18 +20,18 @@ defmodule FlowDemo do
 
   def start do
     Organization.billing_periods()
-    |> Organization.by_provider()
+    |> Organization.by_region()
     |> Flow.from_enumerables()
-    |> Flow.partition(stages: 50)
+    |> Flow.partition(stages: 6)
     |> Flow.map(&Usage.read_usage/1)
     |> Flow.map(&Usage.write_usage/1)
     |> Flow.map(&Usage.storage_usage/1)
-#    |> Flow.map(fn billing_period ->
-#      billing_period
-#      |> Usage.read_usage()
-#      |> Usage.write_usage()
-#      |> Usage.storage_usage()
-#    end)
+    #    |> Flow.map(fn billing_period ->
+    #      billing_period
+    #      |> Usage.read_usage()
+    #      |> Usage.write_usage()
+    #      |> Usage.storage_usage()
+    #    end)
     |> Flow.partition(stages: 50)
     |> Flow.flat_map(&Bills.generate(&1))
     |> Enum.to_list()

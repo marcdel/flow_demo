@@ -1,12 +1,14 @@
 defmodule FlowDemo.Bills do
   def generate(billing_period) do
-    Work.medium()
-
     Enum.map(billing_period.usage, fn usage ->
+      duration = Work.easy()
+
       FakeTelemetry.execute(
         "Generating bills for organization: #{billing_period.organization.id}, usage type: #{
           billing_period.type
-        }"
+        }, provider: #{billing_period.organization.provider}, region: #{
+          billing_period.organization.region
+        }, duration: #{duration}"
       )
 
       %{

@@ -26,6 +26,14 @@ defmodule FlowDemo.Organization do
     |> Map.values()
   end
 
+  def by_region(billing_periods) do
+    FakeTelemetry.execute("Grouping by regions")
+    Work.easy()
+
+    Enum.group_by(billing_periods, & &1.organization.region)
+    |> Map.values()
+  end
+
   def billing_periods do
     FakeTelemetry.execute("Getting billing periods")
 
