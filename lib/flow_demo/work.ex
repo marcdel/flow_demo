@@ -1,6 +1,6 @@
 defmodule Work do
   def hard do
-    do_work(1..1)
+    do_work(8..10)
   end
 
   def medium do

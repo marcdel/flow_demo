@@ -12,8 +12,8 @@ defmodule FlowDemo do
       |> Usage.read_usage()
       |> Usage.write_usage()
       |> Usage.storage_usage()
+      |> Bill.generate()
     end)
-    |> Enum.flat_map(&Bill.generate(&1))
   end
 
   def start_async_stream do
@@ -74,7 +74,7 @@ defmodule FlowDemo do
     |> Flow.map(&Usage.read_usage/1)
     |> Flow.map(&Usage.write_usage/1)
     |> Flow.map(&Usage.storage_usage/1)
-    |> Flow.flat_map(&Bill.generate(&1))
+    |> Flow.map(&Bill.generate/1)
     |> Enum.to_list()
   end
 
@@ -86,7 +86,7 @@ defmodule FlowDemo do
     |> Flow.map(&Usage.read_usage/1)
     |> Flow.map(&Usage.write_usage/1)
     |> Flow.map(&Usage.storage_usage/1)
-    |> Flow.flat_map(&Bill.generate(&1))
+    |> Flow.map(&Bill.generate/1)
     |> Enum.to_list()
   end
 
