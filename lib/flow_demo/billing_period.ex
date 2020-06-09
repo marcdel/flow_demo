@@ -1,4 +1,6 @@
 defmodule FlowDemo.BillingPeriod do
+  alias FlowDemo.Usage
+
   defstruct [
     :organization,
     :provider,
@@ -6,6 +8,6 @@ defmodule FlowDemo.BillingPeriod do
     :start,
     :stop,
     :type,
-    usage: []
+    usage: %Usage{}
   ]
 end

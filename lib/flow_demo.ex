@@ -1,9 +1,7 @@
 defmodule FlowDemo do
   alias __MODULE__.{Organization, Usage, Bill}
 
-  @moduledoc """
-  Documentation for `FlowDemo`.
-  """
+  @three_hours :timer.hours(3)
 
   def start_sync do
     Organization.billing_periods()
@@ -25,34 +23,47 @@ defmodule FlowDemo do
     billing_periods
     |> Organization.by_region()
     |> Enum.flat_map(& &1)
-    |> Task.async_stream(fn(billing_period) ->
-      billing_period
-      |> Usage.read_usage()
-      |> Usage.write_usage()
-      |> Usage.storage_usage()
-      |> Bill.generate()
-    end, timeout: 9_000, on_timeout: :kill_task)
-    |> Enum.reduce(%{bills: [], errors: []}, fn result, results ->
-      handle_result(result, results)
+    |> Task.async_stream(
+      fn billing_period ->
+        billing_period
+        |> Usage.read_usage()
+        |> Usage.write_usage()
+        |> Usage.storage_usage()
+        |> Bill.generate()
+      end,
+      timeout: 9_000,
+      on_timeout: :kill_task
+    )
+    # |> Enum.reduce([], &handle_result/2)
+    |> Enum.reduce([], fn
+      {:ok, new_bill}, bills ->
+        FakeTelemetry.execute(
+          "[#{Enum.count(bills) + 1}/#{Enum.count(billing_periods)}] Got a new bill!"
+        )
+
+        bills ++ [new_bill]
+
+      {:exit, :timeout}, bills ->
+        # Keep on truckin...
+        bills
     end)
   end
 
-  defp handle_result({:ok, new_bills}, %{bills: bills} = results) do
-    FakeTelemetry.execute("[Success] created #{Enum.count(new_bills)} bills: #{inspect(new_bills)}")
+  defp handle_result({:ok, new_bill}, bills) do
+    FakeTelemetry.execute("Got a new bill!")
 
-    %{results | bills: bills ++ new_bills}
+    bills ++ [new_bill]
   end
 
-  defp handle_result({:error, new_errors}, %{errors: errors} = results) do
-    FakeTelemetry.execute("[Error] couldn't create some bills: #{inspect(errors)}")
-
-    %{results | errors: errors ++ new_errors}
+  defp handle_result({:exit, :timeout}, bills) do
+    # Keep on truckin...
+    bills
   end
 
   def start do
-#    multiple_orgs_across_region()
+    # multiple_orgs_across_region()
     multiple_orgs_grouped_by_region()
-    #    one_org_at_a_time_by_regions()
+    # one_org_at_a_time_by_regions()
   end
 
   def multiple_orgs_across_regions do

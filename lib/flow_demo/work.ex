@@ -19,13 +19,6 @@ defmodule Work do
         |> :timer.seconds()
         |> Process.sleep()
 
-        if Enum.random(1..20) == 2 do
-          IO.inspect("Bad luck!!")
-          10
-          |> :timer.seconds()
-          |> Process.sleep()
-        end
-
         :ok
       end)
 

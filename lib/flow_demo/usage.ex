@@ -1,16 +1,16 @@
 defmodule FlowDemo.Usage do
-  defstruct [:type, :value]
+  defstruct [:writes, :reads, :storage]
 
   def write_usage(billing_period) do
-    %{billing_period | usage: billing_period.usage ++ [get_usage(:writes, billing_period)]}
+    put_in(billing_period.usage.writes, get_usage(:writes, billing_period))
   end
 
   def read_usage(billing_period) do
-    %{billing_period | usage: billing_period.usage ++ [get_usage(:reads, billing_period)]}
+    put_in(billing_period.usage.reads, get_usage(:reads, billing_period))
   end
 
   def storage_usage(billing_period) do
-    %{billing_period | usage: billing_period.usage ++ [get_usage(:storage, billing_period)]}
+    put_in(billing_period.usage.storage, get_usage(:storage, billing_period))
   end
 
   defp get_usage(type, billing_period) do
@@ -24,6 +24,6 @@ defmodule FlowDemo.Usage do
       }"
     )
 
-    %__MODULE__{type: type, value: Enum.random(1..100)}
+    Enum.random(1..100)
   end
 end
