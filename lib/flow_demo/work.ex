@@ -1,6 +1,6 @@
 defmodule Work do
   def hard do
-    do_work(8..10)
+    do_work(1..1)
   end
 
   def medium do
@@ -16,7 +16,6 @@ defmodule Work do
       :timer.tc(fn ->
         range
         |> Enum.random()
-        |> :timer.seconds()
         |> Process.sleep()
 
         :ok

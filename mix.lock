@@ -1,4 +1,7 @@
 %{
   "flow": {:hex, :flow, "1.0.0", "3df0b6687ba01dae248c615d50e1f8b36631e3eb9b9a663adf38262035d9fc08", [:mix], [{:gen_stage, "~> 1.0", [hex: :gen_stage, repo: "hexpm", optional: false]}], "hexpm", "103e0d30539db120a432d6433123a6ed885b10bde244e9f4194e3beee080ac29"},
   "gen_stage": {:hex, :gen_stage, "1.0.0", "51c8ae56ff54f9a2a604ca583798c210ad245f415115453b773b621c49776df5", [:mix], [], "hexpm", "1d9fc978db5305ac54e6f5fec7adf80cd893b1000cf78271564c516aa2af7706"},
+  "opentelemetry": {:hex, :opentelemetry, "0.4.0", "293729f014009b03a1a2c47e6367db6f280b41412faa5639f06dcce9733d18a6", [:rebar3], [{:opentelemetry_api, "~> 0.3.1", [hex: :opentelemetry_api, repo: "hexpm", optional: false]}], "hexpm", "f0eb4281f26879147322b0a6f1c457c57f3f1c4121cbff1f6056e4c98b1647a7"},
+  "opentelemetry_api": {:hex, :opentelemetry_api, "0.3.2", "b474cd21af5855a6dfff0912f26c7c40fbf1fd05b045d8e29fd53edeb4c3ec99", [:mix, :rebar3], [], "hexpm", "39b0ef74906e5d001ad244307337d168c594c2a05b67beaddad48ceaebfee352"},
+  "opentelemetry_zipkin": {:hex, :opentelemetry_zipkin, "0.3.0", "b0db7cc2daec7693d57f50d8ab0c72a5376c2c351d85cab7d877a97fb13709c7", [:rebar3], [{:opentelemetry, "~>0.4.0", [hex: :opentelemetry, repo: "hexpm", optional: false]}, {:opentelemetry_api, "~>0.3.1", [hex: :opentelemetry_api, repo: "hexpm", optional: false]}], "hexpm", "c937a7e136e49820ca4107426fc8dc7d7f3a90f0fe3d7e357ae0ec07290fd287"},
 }

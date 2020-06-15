@@ -6,6 +6,8 @@ defmodule FlowDemo.Application do
   use Application
 
   def start(_type, _args) do
+    true = OpenTelemetry.register_application_tracer(:flow_demo)
+
     children = [
       # Starts a worker by calling: FlowDemo.Worker.start_link(arg)
       # {FlowDemo.Worker, arg}

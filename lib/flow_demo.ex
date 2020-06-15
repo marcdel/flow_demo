@@ -1,19 +1,31 @@
 defmodule FlowDemo do
   alias __MODULE__.{Organization, Usage, Bill}
+  require Instrumentation
 
   @three_hours :timer.hours(3)
 
   def start_sync do
-    Organization.billing_periods()
-    |> Organization.by_provider()
-    |> Enum.flat_map(& &1)
-    |> Enum.map(fn billing_period ->
-      billing_period
-      |> Usage.read_usage()
-      |> Usage.write_usage()
-      |> Usage.storage_usage()
-      |> Bill.generate()
-    end)
+    Instrumentation.trace "start_sync" do
+      Organization.billing_periods()
+      |> Organization.by_provider()
+      |> Enum.flat_map(& &1)
+      |> Enum.map(fn billing_period ->
+        Instrumentation.trace "process_billing_period" do
+          Instrumentation.add_metadata(%{
+            org_id: billing_period.organization.id,
+            provider: billing_period.provider,
+            region: billing_period.region,
+            bill_type: billing_period.type
+          })
+
+          billing_period
+          |> Usage.read_usage()
+          |> Usage.write_usage()
+          |> Usage.storage_usage()
+          |> Bill.generate()
+        end
+      end)
+    end
   end
 
   def start_async_stream do

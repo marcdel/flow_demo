@@ -1,4 +1,6 @@
 defmodule FlowDemo.Organization do
+  require Instrumentation
+
   alias __MODULE__
   alias FlowDemo.BillingPeriod
 
@@ -36,14 +38,21 @@ defmodule FlowDemo.Organization do
   end
 
   def billing_periods do
-    FakeTelemetry.execute("Getting billing periods")
+    Instrumentation.trace "billing_periods" do
+      FakeTelemetry.execute("Getting billing periods")
 
-    Work.medium()
-    organizations = billable()
+      Work.medium()
 
-    Enum.flat_map(organizations, fn organization ->
-      get_billing_periods(organization)
-    end)
+      organizations = billable()
+      all_billing_periods = Enum.flat_map(organizations, &get_billing_periods/1)
+
+      Instrumentation.add_metadata(%{
+        organization_count: Enum.count(organizations),
+        billing_periods_count: Enum.count(all_billing_periods)
+      })
+
+      all_billing_periods
+    end
   end
 
   defp get_billing_periods(organization) do
